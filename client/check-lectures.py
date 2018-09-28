@@ -146,6 +146,7 @@ while 1:
 
         print("Next " + lecture.name + " lecture will be at: " + weekday + " " + str(lecture.next_date)
               + " (" + relative_date + ")")
+    print()
 
     if current_version != latest_version:
         print()
