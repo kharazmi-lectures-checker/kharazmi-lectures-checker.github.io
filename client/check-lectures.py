@@ -23,9 +23,11 @@ SOFTWARE.
 """
 
 import datetime
+import os
 import requests
 
-current_version = "0.1"
+
+current_version = "0.2"
 
 
 class Lecture:
@@ -45,12 +47,89 @@ class Lecture:
 
 latest_version = current_version
 latest_version_link = ""
+info_source = "https://kharazmi-lectures-checker.github.io/info/0_2.html"
+lecture_filter = []
+offline_mode = False
 
-print("Kharazmi University Lectures date Checker v" + current_version)
+print("Kharazmi University Lectures Date Checker v" + current_version)
+
+try:
+    file = open("check-lectures-files/config.txt", 'r')
+    for line in file.readlines():
+        try:
+            if line[0] == "#":
+                continue
+            exp = line.split('=')
+            if len(exp) != 2:
+                continue
+            if exp[0].lower() == "info":
+                info_source = exp[1]
+            if exp[0].lower() == "filter":
+                lecture_filter = exp[1].split(';')
+            if exp[0].lower() == "offline":
+                if exp[1].__contains__('1'):
+                    print(exp[1])
+                    offline_mode = True
+        except:
+            pass
+    file.close()
+except FileNotFoundError:
+    print()
+    print("No config file found. Creating one...")
+    if not os.path.exists("check-lectures-files"):
+        os.makedirs("check-lectures-files")
+    file = open("check-lectures-files/config.txt", 'w+')
+    file.write(
+        "# This config file is auto-generated.\n"
+        "\n"
+        "# Each line that STARTS in its first letter with # is a comment.\n"
+        "\n"
+        "# The following line will define a custom source to check the updates and info:\n"
+        "#info=https://example.com/info.html\n"
+        "\n"
+        "# The following line will only allow the app to show a limited set of lectures:\n"
+        "#filter=Computer Networks;Formal Methods in Software Engineering;Software Engineering;Software Testing;\n"
+        "\n"
+        "# The following line will toggle offline mode, that the app will only read the offline info file:\n"
+        "#offline=1\n"
+    )
+    file.close()
 
 while 1:
-    print("Getting online info...")
-    info = requests.get("https://kharazmi-lectures-checker.github.io/info_0_1.html").text.split(';')
+    print()
+
+    info = None
+    if not offline_mode:
+        print("Getting online info...")
+        try:
+            info = requests.get(info_source).text
+            offline_info = ""
+            try:
+                file = open("check-lectures-files/info.txt", 'r')
+                offline_info = file.read()
+                file.close()
+            except FileNotFoundError:
+                print("Creating an offline copy...")
+                if not os.path.exists("check-lectures-files"):
+                    os.makedirs("check-lectures-files")
+            if info != offline_info:
+                print("Writing an offline copy...")
+                file = open("check-lectures-files/info.txt", 'w+')
+                file.write(info)
+                file.close()
+        except:
+            print("Couldn't get the info online.")
+    if info is None:
+        print("Getting offline info...")
+        try:
+            file = open("check-lectures-files/info.txt", 'r')
+            info = file.read()
+            file.close()
+        except FileNotFoundError:
+            print("check-lectures-files/info.txt does not exist. No info has been loaded.")
+            info = ""
+
+    info = info.split(';')
 
     lecture_name = "N/A"
     last_submitted_date = None
@@ -75,7 +154,7 @@ while 1:
 
     for block in info:
         exp = block.split('=')
-        if len(exp) < 2:
+        if len(exp) != 2:
             continue
         if exp[0] == "lecture" or exp[0] == "lecture_name":
             clear_info()
@@ -112,6 +191,10 @@ while 1:
     now_rounded = datetime.datetime(year=now.year, month=now.month, day=now.day)
     print()
     for lecture in lectures:
+        if len(lecture_filter) > 0:
+            if not lecture_filter.__contains__(lecture.name):
+                continue
+
         next_date_rounded = datetime.datetime(year=lecture.next_date.year,
                                               month=lecture.next_date.month,
                                               day=lecture.next_date.day)
@@ -155,7 +238,10 @@ while 1:
         print("You can download the latest version from: " + latest_version_link)
         print("Do you want to download the latest version? (y/*)")
         if input() == "y":
-            open(__file__, 'wb').write(requests.get(latest_version_link).content)
+            try:
+                open(__file__, 'wb').write(requests.get(latest_version_link).content)
+            except:
+                print("Could not get the update.")
 
     print("Enter r to retry and anything to exit:")
 
