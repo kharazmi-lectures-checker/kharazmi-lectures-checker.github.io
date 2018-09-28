@@ -147,18 +147,14 @@ while 1:
         print("Next " + lecture.name + " lecture will be at: " + weekday + " " + str(lecture.next_date)
               + " (" + relative_date + ")")
 
-    if current_version == latest_version:
+    if current_version != latest_version:
         print()
         print("Current version: " + current_version)
         print("Latest version: " + latest_version)
         print("You can download the latest version from: " + latest_version_link)
         print("Do you want to download the latest version? (y/*)")
         if input() == "y":
-            open("check-lecture.py", 'wb').write(
-                requests.get(
-                    "https://kharazmi-lectures-checker.github.io/client/check-lecture.py"
-                ).content
-            )
+            open(__file__, 'wb').write(requests.get(latest_version_link).content)
 
     print("Enter r to retry and anything to exit:")
 
