@@ -27,7 +27,7 @@ import os
 import requests
 
 
-current_version = "0.2"
+current_version = "0.3"
 
 
 class Lecture:
@@ -42,7 +42,7 @@ class Lecture:
             self.next_date -= self.period
 
     def __lt__(self, other):
-        return self.last_submitted_date < other.last_submitted_date
+        return self.next_date < other.next_date
 
 
 latest_version = current_version
@@ -236,10 +236,11 @@ while 1:
         print("Current version: " + current_version)
         print("Latest version: " + latest_version)
         print("You can download the latest version from: " + latest_version_link)
-        print("Do you want to download the latest version? (y/*)")
+        print("Do you want to update to the latest version? (y/*)")
         if input() == "y":
             try:
                 open(__file__, 'wb').write(requests.get(latest_version_link).content)
+                print("Updated! Please restart the script.")
             except:
                 print("Could not get the update.")
 
