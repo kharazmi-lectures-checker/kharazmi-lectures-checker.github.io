@@ -27,7 +27,7 @@ import os
 import requests
 
 
-current_version = "0.5"
+current_version = "0.6"
 
 
 class Lecture:
@@ -66,7 +66,8 @@ try:
             if exp[0].lower() == "info":
                 info_source = exp[1]
             if exp[0].lower() == "filter":
-                lecture_filter = exp[1].split(';')
+                for name in exp[1].split(';'):
+                    lecture_filter.append(name)
             if exp[0].lower() == "offline":
                 if exp[1].__contains__('1'):
                     print(exp[1])
@@ -95,6 +96,8 @@ except FileNotFoundError:
         "\n"
         "# The following line will only allow the app to show a limited set of lectures:\n"
         "#filter=Computer Networks;Formal Methods in Software Engineering;Software Engineering;Software Testing;\n"
+        "# And add more items in another line:\n"
+        "#filter=Some Other Lecture 1; Some Other Lecture 2;"
         "\n"
         "# The following line will toggle offline mode, that the app will only read the offline info file:\n"
         "#offline=1\n"
