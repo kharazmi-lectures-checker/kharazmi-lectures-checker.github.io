@@ -27,7 +27,7 @@ import os
 import requests
 
 
-current_version = "0.6"
+current_version = "0.8"
 
 
 class Lecture:
@@ -50,7 +50,8 @@ latest_version_link = ""
 info_source = "https://kharazmi-lectures-checker.github.io/info/0_2.html"
 lecture_filter = []
 offline_mode = False
-show_lecture_duplicates = False
+show_lecture_duplicates = True
+reverse_sort = True
 
 print("Kharazmi University Lectures Date Checker v" + current_version)
 
@@ -70,12 +71,13 @@ try:
                     lecture_filter.append(name)
             if exp[0].lower() == "offline":
                 if exp[1].__contains__('1'):
-                    print(exp[1])
                     offline_mode = True
             if exp[0].lower() == "duplicates":
-                if exp[1].__contains__('1'):
-                    print(exp[1])
-                    show_lecture_duplicates = True
+                if exp[1].__contains__('0'):
+                    show_lecture_duplicates = False
+            if exp[0].lower() == "reverse_sort":
+                if exp[1].__contains__('0'):
+                    reverse_sort = False
         except:
             pass
     file.close()
@@ -103,8 +105,11 @@ except FileNotFoundError:
         "#offline=1\n"
         "\n"
         "# The following line will allow lecture duplicates"
-        " (not to show only the lecture presented in the nearest future with the same name)\n"
-        "#duplicates=1\n"
+        " (duplicate=1 => not to show only the lecture presented in the nearest future with the same name)\n"
+        "#duplicates=0\n"
+        "\n"
+        "# The following line will toggle reverse sorting lectures:\n"
+        "#reverse_sort=0\n"
     )
     file.close()
 
@@ -198,15 +203,18 @@ while 1:
             except:
                 pass
             add_info()
+        elif offline_mode:
+            pass
         elif exp[0] == "latest_version":
             latest_version = exp[1]
         elif exp[0] == "latest_version_link" or exp[0] == "latest_version_url" or exp[0] == "latest_version_download":
             latest_version_link = exp[1]
 
-    lectures.sort()
+    lectures.sort(reverse=reverse_sort)
     showed_lectures = []
     now = datetime.datetime.now()
     now_rounded = datetime.datetime(year=now.year, month=now.month, day=now.day)
+    last_next_date_rounded = None
     print()
     for lecture in lectures:
         if len(lecture_filter) > 0:
@@ -255,10 +263,31 @@ while 1:
         elif lecture.next_date.weekday() == 4: weekday = "Fri"
         else: weekday = "Cool! That's a bug that seems impossible!"
 
-        print("Next " + lecture.name + " lecture will be at: " + weekday + " " + str(lecture.next_date)
-              + " (" + relative_date + ")")
-    print()
+        if last_next_date_rounded is not None:
+            if last_next_date_rounded != next_date_rounded:
+                print()
+        last_next_date_rounded = next_date_rounded
 
+        if show_lecture_duplicates:
+            t = ""
+        else:
+            t = "Next "
+        print(weekday + " " + str(lecture.next_date)
+              + " (" + relative_date + "): " + t + lecture.name)
+
+    if offline_mode:
+        try:
+            for block in requests.get(info_source).text.split(';'):
+                exp = block.split('=')
+                if len(exp) == 2:
+                    if exp[0] == "latest_version":
+                        latest_version = exp[1]
+                    elif exp[0] == "latest_version_link" or exp[0] == "latest_version_url" or exp[0] == "latest_version_download":
+                        latest_version_link = exp[1]
+        except:
+            pass
+
+    print()
     if current_version != latest_version:
         print()
         print("Current version: " + current_version)
