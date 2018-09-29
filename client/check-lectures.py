@@ -287,7 +287,6 @@ while 1:
         except:
             pass
 
-    print()
     if current_version != latest_version:
         print()
         print("Current version: " + current_version)
@@ -301,6 +300,7 @@ while 1:
             except:
                 print("Could not get the update.")
 
+    print()
     print("Enter r to retry and anything to exit:")
 
     if input() != 'r':
