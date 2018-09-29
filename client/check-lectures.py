@@ -27,7 +27,7 @@ import os
 import requests
 
 
-current_version = "0.3"
+current_version = "0.4"
 
 
 class Lecture:
@@ -50,6 +50,7 @@ latest_version_link = ""
 info_source = "https://kharazmi-lectures-checker.github.io/info/0_2.html"
 lecture_filter = []
 offline_mode = False
+show_lecture_duplicates = False
 
 print("Kharazmi University Lectures Date Checker v" + current_version)
 
@@ -70,6 +71,10 @@ try:
                 if exp[1].__contains__('1'):
                     print(exp[1])
                     offline_mode = True
+            if exp[0].lower() == "duplicates":
+                if exp[1].__contains__('1'):
+                    print(exp[1])
+                    show_lecture_duplicates = True
         except:
             pass
     file.close()
@@ -92,6 +97,10 @@ except FileNotFoundError:
         "\n"
         "# The following line will toggle offline mode, that the app will only read the offline info file:\n"
         "#offline=1\n"
+        "\n"
+        "# The following line will allow lecture duplicates"
+        " (not to show only the lecture presented in the nearest future with the same name)\n"
+        "#duplicates=1\n"
     )
     file.close()
 
@@ -169,6 +178,11 @@ while 1:
                 last_submitted_date = datetime.datetime(year=int(exp[1][0:4]),
                                                         month=int(exp[1][5:7]),
                                                         day=int(exp[1][8:10]),
+                                                        hour=int(exp[1][11:13]))
+
+                last_submitted_date = datetime.datetime(year=int(exp[1][0:4]),
+                                                        month=int(exp[1][5:7]),
+                                                        day=int(exp[1][8:10]),
                                                         hour=int(exp[1][11:13]),
                                                         minute=int(exp[1][14:16]))
             except:
@@ -182,11 +196,11 @@ while 1:
             add_info()
         elif exp[0] == "latest_version":
             latest_version = exp[1]
-        elif exp[0] == "latest_version_link":
+        elif exp[0] == "latest_version_link" or exp[0] == "latest_version_url" or exp[0] == "latest_version_download":
             latest_version_link = exp[1]
 
     lectures.sort()
-
+    showed_lectures = []
     now = datetime.datetime.now()
     now_rounded = datetime.datetime(year=now.year, month=now.month, day=now.day)
     print()
@@ -194,6 +208,16 @@ while 1:
         if len(lecture_filter) > 0:
             if not lecture_filter.__contains__(lecture.name):
                 continue
+
+        if not show_lecture_duplicates:
+            should_continue = False
+            for showed_lecture in showed_lectures:
+                if showed_lecture.name == lecture.name:
+                    should_continue = True
+                    break
+            if should_continue:
+                continue
+            showed_lectures.append(lecture)
 
         next_date_rounded = datetime.datetime(year=lecture.next_date.year,
                                               month=lecture.next_date.month,
