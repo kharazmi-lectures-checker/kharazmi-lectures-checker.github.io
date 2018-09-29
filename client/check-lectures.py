@@ -27,7 +27,7 @@ import os
 import requests
 
 
-current_version = "0.8"
+current_version = "0.9"
 
 
 class Lecture:
@@ -51,7 +51,7 @@ info_source = "https://kharazmi-lectures-checker.github.io/info/0_2.html"
 lecture_filter = []
 offline_mode = False
 show_lecture_duplicates = True
-reverse_sort = True
+reverse_sort = False
 
 print("Kharazmi University Lectures Date Checker v" + current_version)
 
@@ -76,8 +76,8 @@ try:
                 if exp[1].__contains__('0'):
                     show_lecture_duplicates = False
             if exp[0].lower() == "reverse_sort":
-                if exp[1].__contains__('0'):
-                    reverse_sort = False
+                if exp[1].__contains__('1'):
+                    reverse_sort = True
         except:
             pass
     file.close()
@@ -109,7 +109,7 @@ except FileNotFoundError:
         "#duplicates=0\n"
         "\n"
         "# The following line will toggle reverse sorting lectures:\n"
-        "#reverse_sort=0\n"
+        "#reverse_sort=1\n"
     )
     file.close()
 
