@@ -27,7 +27,7 @@ import os
 import requests
 
 
-current_version = "1.0"
+current_version = "1.1"
 
 
 class Lecture:
@@ -49,7 +49,6 @@ data_dir = __file__
 if data_dir.endswith(".py"):
     data_dir = data_dir[:-3]
 data_dir += "-files"
-print(data_dir)
 
 latest_version = current_version
 latest_version_link = ""
