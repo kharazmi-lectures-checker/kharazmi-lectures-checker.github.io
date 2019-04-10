@@ -52,7 +52,7 @@ data_dir += "-files"
 
 latest_version = current_version
 latest_version_link = ""
-info_source = "https://lectures-checker.github.io/info/1_2.html"
+info_source = "https://lectures-checker.github.io/info/1_2"
 lecture_filter = []
 offline_mode = False
 show_lecture_duplicates = True
