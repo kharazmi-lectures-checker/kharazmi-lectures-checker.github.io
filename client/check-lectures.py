@@ -27,7 +27,7 @@ import os
 import requests
 
 
-current_version = "1.1"
+current_version = "1.2"
 
 
 class Lecture:
@@ -52,13 +52,13 @@ data_dir += "-files"
 
 latest_version = current_version
 latest_version_link = ""
-info_source = "https://kharazmi-lectures-checker.github.io/info/0_2.html"
+info_source = "https://lectures-checker.github.io/info/0_2.html"
 lecture_filter = []
 offline_mode = False
 show_lecture_duplicates = True
 reverse_sort = False
 
-print("Kharazmi University Lectures Date Checker v" + current_version)
+print("University Lectures Date Checker v" + current_version)
 
 try:
     file = open(os.path.join(data_dir, "config.txt"), 'r')
